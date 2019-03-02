@@ -7,7 +7,7 @@ import json
 class StringGeneratorWebService(object):
 
     @cherrypy.tools.accept(media='text/plain')
-    def GET(self):
+    def GET(self, sql="SELECT * FROM user_details"):
         connection = pymysql.connect(host='localhost',
                                      user='root',
                                      password='',
@@ -18,9 +18,10 @@ class StringGeneratorWebService(object):
         try:
             with connection.cursor() as cursor:
                 # Read a single record
-                sql = "SELECT * FROM user_details"
                 cursor.execute(sql)
                 result = [dict(r) for r in cursor.fetchall()]
+        except:
+            result = dict({"error": "an error occurred"})
         finally:
             connection.close()
             return json.dumps(result, ensure_ascii=False)
@@ -35,4 +36,4 @@ if __name__ == '__main__':
             'tools.response_headers.headers': [('Content-Type', 'text/plain')],
         }
     }
-    cherrypy.quickstart(StringGeneratorWebService(), '/', conf)
+    cherrypy.quickstart(StringGeneratorWebService(), '/query', conf)
